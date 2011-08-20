@@ -26,6 +26,7 @@
  
 Particle[] pArray;                // declare p - p is null!
 PImage logo;
+int distance = 100; //how far away from center before it stops moving
  
 void setup()
 {
@@ -190,7 +191,7 @@ class Particle
 		
         float magnitude = mouse.mag();  // find out how far the particle is from the mouse
 		
-		if (magnitude > 15) //if it's far away, animate it!
+		if (magnitude > distance) //if it's far away, animate it!
 		{
 			acc.set( mouse );               // store this as the acceleration vector
 			 
