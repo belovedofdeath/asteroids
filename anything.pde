@@ -25,6 +25,7 @@
 */
  
 Particle[] pArray;                // declare p - p is null!
+PImage logo;
  
 void setup()
 {
@@ -41,6 +42,7 @@ void setup()
 		pArray[i] = new Particle( random( width ), random( height ), 0, i );
 		pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
     }
+	logo = loadImage("images/armored_io_logo.png");
 }
  
 /**
@@ -59,6 +61,8 @@ void draw()
 			pArray[i].draw();               // draw the particle
 		
     }
+	// format for image: iamge(PImage object, x, y, width, height)
+	image(logo, (width / 2) - (logo.width / 8), (height / 2) - (logo.height / 8), (logo.width / 4), (logo.height / 4));
 }
  
 /**
