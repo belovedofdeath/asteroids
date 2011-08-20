@@ -38,8 +38,8 @@ void setup()
     // for each element and set each one with a random velocity
     for( int i=0; i<pArray.length; i++ )
     {
-        pArray[i] = new Particle( random( width ), random( height ), 0, i );
-        pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );
+		pArray[i] = new Particle( random( width ), random( height ), 0, i );
+		pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
     }
 }
  
@@ -193,8 +193,8 @@ class Particle
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
-			//pArray.splice(id, 1); //remove the element from the array
-			pArray.splice(id, 1);
+			//pArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
+			
 		}
     }  // end of mouseAttract()
 	 
