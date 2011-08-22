@@ -9,7 +9,8 @@ void setup()
 	size( 500, 500 );      // set screen size
     noStroke();            // don't draw any strokes around shapes
     smooth();              // turn on anti-aliasing
-	aArray = new Asteroid[1];
+	noLoop();
+	//aArray = new Asteroid[1];
 	//logo = loadImage("images/armored_io_logo.png");
 	/*
 	for( int i=0; i < aArray.length; i++ )
@@ -32,7 +33,7 @@ void draw()
     }
 	*/
 	shape(img, 25, 68);
-	noLoop();
+	
 }
 
 void randomNum(little, big)
@@ -45,7 +46,7 @@ class Asteroid
 	int asteroid_center_x;
 	int asteroid_center_y;
 	int points = new Array();
-	PShape img;
+	//PShape img;
 	
 	Asteroid(sides)
 	{
@@ -79,7 +80,7 @@ class Asteroid
 	{
 		println("entering draw loop...");
 		shape(img, asteroid_center_x, asteroid_center_y);
-		
+	}
 /*
 	stroke(0);
 		beginShape();
@@ -100,5 +101,7 @@ vertex(113, 118)
 vertex(118, 113)
 		endShape(CLOSE);
 	}
+} // end draw()
 	*/
-}
+
+} //end class Asteroid
