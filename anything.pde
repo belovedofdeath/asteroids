@@ -5,7 +5,6 @@
 
 //import processing.video.*;
  
- 
 /*
     This is a basic particle system.  The particles move around and are
     either attracted to or repelled from the mouse.
@@ -57,10 +56,8 @@ void draw()
      
     for ( int i=0;i<pArray.length;i++ )
     {
-		
-			pArray[i].update();             // update the particle
-			pArray[i].draw();               // draw the particle
-		
+		pArray[i].update();             // update the particle
+		pArray[i].draw();               // draw the particle
     }
 	// format for image: iamge(PImage object, x, y, width, height)
 	image(logo, (width / 2) - (logo.width / 8), (height / 2) - (logo.height / 8), (logo.width / 4), (logo.height / 4));
@@ -143,6 +140,7 @@ class Particle
         fill( vel.mag(), 1.0f, 1.0f );       // set the particle colour based upon its speed
         colorMode( RGB, 255, 255, 255 );     // return to the default colour model
         ellipse( pos.x, pos.y, 3, 3 );       // draw the particle
+		
     }  // end of Particle.draw()
      
      
@@ -176,12 +174,9 @@ class Particle
     {
         float magnetism;          // magnetism factor - +tve values attract
          
-        if ( attract == true )     // check if this particle should be attracted or repulsed
-        {
+        if ( attract == true ) {   // check if this particle should be attracted or repulsed
             magnetism = 1.0f;      // make particles be attracted to the mouse
-        }
-        else
-        {
+        } else {
             magnetism = -1.0f;    // make particles be repulsed by the mouse
         }
          
@@ -193,8 +188,7 @@ class Particle
 		
 		if (magnitude > distance) //if it's far away, animate it!
 		{
-			acc.set( mouse );               // store this as the acceleration vector
-			 
+			acc.set( mouse );               // store this as the acceleration vector 
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
@@ -202,5 +196,5 @@ class Particle
 			
 		}
     }  // end of mouseAttract()
-	 
 }  // end of particle class
+
