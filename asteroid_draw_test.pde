@@ -18,13 +18,13 @@ void setup()
 		aArray[i] = new Asteroid(randomNum(3, 10));
     }
 	*/
-	img = loadShape("images/asteroids.svg");
+	img = loadShape("images/asteroids2.svg");
 }
 
 void draw()
 {
 	println("test");
-	background( 255 ); // reset background, erase old drawing
+	background( 0 ); // reset background, erase old drawing
 	//image(logo, (width / 2) - (logo.width / 8), (height / 2) - (logo.height / 8), (logo.width / 4), (logo.height / 4));
 	/*
 	for (int i = 0; i < aArray.length; i++)
@@ -32,7 +32,7 @@ void draw()
 		aArray[i].draw();  // draw the asteroid
     }
 	*/
-	shape(img, 25, 68);
+	shape(img, 0, 0, 200, 200);
 	
 }
 
