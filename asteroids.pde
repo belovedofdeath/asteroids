@@ -9,8 +9,8 @@
     This is a basic particle system.  The particles move around and are
     either attracted to or repelled from the mouse.
      
-    Particle System
-    Particles:
+    Asteroid System
+    Asteroids:
       Member variables
         - position
         - velocity
@@ -23,7 +23,7 @@
      
 */
 boolean debugOn = true;
-Particle[] pArray;                // declare p - p is null!
+Asteroid[] aArray;                // declare p - p is null!
 PImage logo;
 int killThreshold = 100; //how far away from center before it stops moving
 int width = 500;
@@ -38,7 +38,7 @@ void setup()
     smooth();              // turn on anti-aliasing
 	
     if (debugOn) { console.log("setup cool."); }
-    pArray = new Particle[numAsteroids];    // set up my array of Particles 
+    aArray = new Asteroid[numAsteroids];    // set up my array of Asteroids 
     if (debugOn) { console.log("instantiating asteroids..."); }
     createAsteroids();
 	if (debugOn) { console.log("made asteroids."); }
@@ -57,7 +57,7 @@ void draw()
     background(backgroundColor);        // set background to black, erase old drawing
     if (debugOn) { console.log("set background."); }
     updateAsteroids();
-	if (debugOn) { console.log("finished updating pArray"); }
+	if (debugOn) { console.log("finished updating aArray"); }
 	// format for image: iamge(PImage object, x, y, width, height)
 	drawLogo();
 	if (debugOn) { console.log("finished printing logo"); }
@@ -77,25 +77,24 @@ void drawLogo()
 void createAsteroids()
 {
 	if (debugOn) { console.log("entering createAsteroids..."); }
-	// loop through the Particle array (pArray) and instantiate new particles
-    // for each element and set each one with a random velocity
-	for( int i=0; i < pArray.length; i++ )
+	// loop through the Asteroid array (aArray) and instantiate new asteroids for each element and set each one with a random velocity
+	for( int i=0; i < aArray.length; i++ )
     {
 		if (debugOn) { console.log("   making asteroid...."); }
-		pArray[i] = new Particle( random( width ), random( height ), 0, i );
-		pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
+		aArray[i] = new Asteroid( random( width ), random( height ), 0, i );
+		aArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
     }
 }
 
 void updateAsteroids()
 {
 	if (debugOn) { console.log("entering updateAsteroids..."); }
-	for (int i = 0; i < pArray.length; i++)
+	for (int i = 0; i < aArray.length; i++)
     {
 		if (debugOn) { console.log("   updating asteroid...."); }
-		if (pArray[i] != null)
+		if (aArray[i] != null)
 		{
-			pArray[i].draw();  // draw the asteroid
+			aArray[i].draw();  // draw the asteroid
 		}
     }
 }
@@ -106,9 +105,9 @@ a mouse button
 void mouseReleased()
 {
     console.log( "Mouse released!" );
-    for ( int i=0;i<pArray.length;i++ )          // loop through all particles, and for each one...
+    for ( int i=0;i<aArray.length;i++ )          // loop through all particles, and for each one...
     {
-        pArray[i].attract = !pArray[i].attract;  // ...use NOT (!) to flip true to false and vice versa
+        aArray[i].attract = !aArray[i].attract;  // ...use NOT (!) to flip true to false and vice versa
         // eg: !true == false
         // so, if attract == true then !attract == false (note the exclamation mark)
     }
@@ -132,25 +131,26 @@ void randomNum(little, big)
 }
  
 /**
-This is out particle class - it first defines member variables, then a constructor, and then
+This is our asteroid class - it first defines member variables, then a constructor, and then
 it defines methods.
 */
-class Particle
+class Asteroid
 {
     // member variables
     PVector pos;    // pos.x pos.y pos.z
     PVector vel;    // vel.x vel.y vel.z
     PVector acc;    // acc.x acc.y acc.z
 	int id;			//corresponds with array key
+	int size;
 	PShape img;
 	float rotation;
-    boolean attract;    // true is particles should move toward the mouse, false otherwise
+    boolean attract;    // true if asteroids should move toward the center, false otherwise
      
     /**
     Constructor method - used with new, as in
-    Particle p = new Particle( x, y, z );
+    Asteroid p = new Asteroid( x, y, z );
     */
-    Particle( float x, float y, float z, int idin )
+    Asteroid( float x, float y, float z, int idin )
     {
         // instantiate the vectors so we don't get null pointer exceptions
         pos = new PVector(x, y);   // set the position based on parameters
@@ -158,11 +158,13 @@ class Particle
         acc = new PVector();
         attract = true;
 		id = idin;
-		img = loadShape("images/asteroids2.svg");
-		this.setParticleRotation();
+		var shapeName = "asteroid" + String(randomNum(2,5));
+		img = loadShape("images/" + shapeName + ".svg");
+		this.setAsteroidRotation();
+		size = randomNum(20,40); //this will eventually be set by the type of attack is incoming
     } 
 	
-	void setParticleRotation() //seal of "works for now" from nick
+	void setAsteroidRotation() //seal of "works for now" from nick
 	{
 		console.log("setting rotation");
 		var randomPercent = randomNum(1,2) == 1;
@@ -191,9 +193,9 @@ class Particle
 			vel.mult( 0.98f );            // apply friction (otherwise particles end up moving too fast)
 			bounce();                     // bounce off edges of screen
 			acc.set( 0, 0, 0 );           // reset acceleration - we calculate is fresh each loop
-			shape(img, pos.x, pos.y, 20, 20);
+			shape(img, pos.x, pos.y, size, size);
 		}
-	}  // end of Particle.update()
+	}  // end of Asteroid.update()
     
     void stillAlive(){
 		//this is where i need to kill the asteroid if it's too close
@@ -204,7 +206,7 @@ class Particle
 		var result = true;
 		if (distance < killThreshold) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
-			pArray[id] = null;
+			aArray[id] = null;
 			result = false;
 		}
 		return result;
@@ -259,9 +261,9 @@ class Particle
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
-			//pArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
+			//aArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
 			//this.destroy();
-			pArray[id] = null;
+			aArray[id] = null;
 		}
     }  // end of attractor()
 }  // end of particle class
