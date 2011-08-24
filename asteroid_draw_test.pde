@@ -1,15 +1,17 @@
 // @pjs preload must be used to preload the image so that it will be available when used in the sketch  
 /* @pjs preload="images/armored_io_logo.png"; */ 
 
-Asteroid[] aArray;
-PShape img;
+Asteroid myAsteroid;
+//PShape img;
 
 void setup()
 {
-	size( 500, 500 );      // set screen size
+	println("setup test");
+	size(500, 500);      // set screen size
     noStroke();            // don't draw any strokes around shapes
     smooth();              // turn on anti-aliasing
 	noLoop();
+	println("setup cool");
 	//aArray = new Asteroid[1];
 	//logo = loadImage("images/armored_io_logo.png");
 	/*
@@ -18,13 +20,16 @@ void setup()
 		aArray[i] = new Asteroid(randomNum(3, 10));
     }
 	*/
-	img = loadShape("images/asteroids2.svg");
+	//img = loadShape("images/asteroids2.svg");
+	//aArray[0] = new Asteroid();
+	myAsteroid = new Asteroid();
+	
 }
 
 void draw()
 {
 	println("test");
-	background( 0 ); // reset background, erase old drawing
+	background( 128 ); // reset background, erase old drawing
 	//image(logo, (width / 2) - (logo.width / 8), (height / 2) - (logo.height / 8), (logo.width / 4), (logo.height / 4));
 	/*
 	for (int i = 0; i < aArray.length; i++)
@@ -32,27 +37,31 @@ void draw()
 		aArray[i].draw();  // draw the asteroid
     }
 	*/
-	shape(img, 0, 0, 200, 200);
-	
+	//shape(img, 0, 0, 200, 200);
+	myAsteroid.draw();
+	noLoop();
 }
 
 void randomNum(little, big)
 {
-	return ( Math.floor (Math.random() * (big - little) + little));
+	return (Math.floor (Math.random() * (big - little) + little));
 }
 
 class Asteroid
 {
 	int asteroid_center_x;
 	int asteroid_center_y;
-	int points = new Array();
-	//PShape img;
+	//int points = new Array();
+	PShape img;
 	
-	Asteroid(sides)
+	Asteroid()
 	{
-		asteroid_center_x = randomNum(0, width);
-		asteroid_center_y = randomNum(0, height);
-		
+		//asteroid_center_x = randomNum(0, width);
+		asteroid_center_x = 0;
+		//asteroid_center_y = randomNum(0, height);
+		asteroid_center_y = 0;
+		println("made asteroid: (" + asteroid_center_x + ", " + asteroid_center_y + ")");
+		/*
 		println("making asteroid with " + sides + " sides....");
 		float size;
 		size = randomNum(20,40); 
@@ -70,9 +79,9 @@ class Asteroid
 		for (i = 0; i < points.length; i += 2)
 		{
 			println("(" + points[i] + ", " + points[i + 1] + ")");
-		}
+		}*/
 		
-		//img = loadShape("images/asteroids.svg");
+		img = loadShape("images/asteroids2.svg");
 		
 	}
 	
