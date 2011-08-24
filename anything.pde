@@ -25,7 +25,7 @@
 boolean debugOn = true;
 Particle[] pArray;                // declare p - p is null!
 PImage logo;
-int distance = 20; //how far away from center before it stops moving
+int killThreshold = 100; //how far away from center before it stops moving
 int width = 500;
 int height = 500;
 int numAsteroids = 25; 
@@ -95,7 +95,7 @@ void updateAsteroids()
 		if (debugOn) { console.log("   updating asteroid...."); }
 		if (pArray[i] != null)
 		{
-			pArray[i].draw();               // draw the particle
+			pArray[i].draw();  // draw the asteroid
 		}
     }
 }
@@ -185,7 +185,7 @@ class Particle
 		if (stillAlive()) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
 			img.rotate(rotation);
-			mouseAttract();               // change acc to make particles accelerate toward the mouse
+			attractor();               // change acc to make particles accelerate toward the mouse
 			vel.add( acc );               // apply acceleration to velocity
 			pos.add( vel );               // add velocity to positon (move particle)
 			vel.mult( 0.98f );            // apply friction (otherwise particles end up moving too fast)
@@ -201,7 +201,6 @@ class Particle
 		PVector center = new PVector( width / 2, height / 2 );
 		
 		var distance = dist(center.x,center.y,this.x,this.y);
-		var killThreshold = 120;
 		var result = true;
 		if (distance < killThreshold) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
@@ -230,14 +229,14 @@ class Particle
     }  // end of bounce()
      
     /**
-    mouseAttract()
+    attractor()
     Move particles towards or away from the mouse
     by doing some basic vector math to determine the
     relationship between the particle and the mouse
     and based on that, calcuating an appropriate acceleration to
     move the particle either away from or to the mouse
     */
-    void mouseAttract()
+    void attractor()
     {
         float magnetism;          // magnetism factor - +tve values attract
          
@@ -254,7 +253,7 @@ class Particle
 		
         float magnitude = mouse.mag();  // find out how far the particle is from the mouse
 		
-		if (magnitude > distance) //if it's far away, animate it!
+		if (magnitude > killThreshold) //if it's far away, animate it!
 		{
 			acc.set( mouse );               // store this as the acceleration vector 
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
@@ -262,7 +261,7 @@ class Particle
 		} else { //if it's close, explode it! (ie: for now, just delete it)
 			//pArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
 			//this.destroy();
-			//
+			pArray[id] = null;
 		}
-    }  // end of mouseAttract()
+    }  // end of attractor()
 }  // end of particle class
