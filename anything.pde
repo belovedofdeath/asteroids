@@ -22,27 +22,28 @@
         - draw()
      
 */
- 
+boolean debugOn = true;
 Particle[] pArray;                // declare p - p is null!
 PImage logo;
-int distance = 100; //how far away from center before it stops moving
+int distance = 20; //how far away from center before it stops moving
+int width = 500;
+int height = 500;
+int numAsteroids = 25; 
+int backgroundColor = 0;
  
 void setup()
 {
-    size( 500, 500 );      // set screen size
+    size(width, height);      // set screen size
     noStroke();            // don't draw any strokes around shapes
     smooth();              // turn on anti-aliasing
-     
-    pArray = new Particle[100];    // set up my array of Particles 
-     
-    // loop through the Particle array (pArray) and instantiate new particles
-    // for each element and set each one with a random velocity
-    for( int i=0; i<pArray.length; i++ )
-    {
-		pArray[i] = new Particle( random( width ), random( height ), 0, i );
-		pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
-    }
+	
+    if (debugOn) { console.log("setup cool."); }
+    pArray = new Particle[numAsteroids];    // set up my array of Particles 
+    if (debugOn) { console.log("instantiating asteroids..."); }
+    createAsteroids();
+	if (debugOn) { console.log("made asteroids."); }
 	logo = loadImage("images/armored_io_logo.png");
+	if (debugOn) { console.log("set image"); }
 }
  
 /**
@@ -52,24 +53,59 @@ of frames per second)
 */
 void draw()   
 {
-    background( 0 );        // set background to black, erase old drawing
-     
-    for ( int i=0;i<pArray.length;i++ )
-    {
-		pArray[i].update();             // update the particle
-		pArray[i].draw();               // draw the particle
-    }
+	if (debugOn) { console.log("starting draw round..."); }
+    background(backgroundColor);        // set background to black, erase old drawing
+    if (debugOn) { console.log("set background."); }
+    updateAsteroids();
+	if (debugOn) { console.log("finished updating pArray"); }
 	// format for image: iamge(PImage object, x, y, width, height)
-	image(logo, (width / 2) - (logo.width / 8), (height / 2) - (logo.height / 8), (logo.width / 4), (logo.height / 4));
+	drawLogo();
+	if (debugOn) { console.log("finished printing logo"); }
 }
- 
+
+void drawLogo()
+{
+	var scaleLogo = 4;
+	var doublingFactor = scaleLogo * 2;
+	var logoX = (width / 2) - (logo.width / doublingFactor);
+	var logoY = (height / 2) - (logo.height / doublingFactor);
+	var logoDisplayWidth = (logo.width / scaleLogo);
+	var logoDisplayHeight = (logo.height / scaleLogo);
+	image(logo, logoX, logoY, logoDisplayWidth, logoDisplayHeight);
+}
+
+void createAsteroids()
+{
+	if (debugOn) { console.log("entering createAsteroids..."); }
+	// loop through the Particle array (pArray) and instantiate new particles
+    // for each element and set each one with a random velocity
+	for( int i=0; i < pArray.length; i++ )
+    {
+		if (debugOn) { console.log("   making asteroid...."); }
+		pArray[i] = new Particle( random( width ), random( height ), 0, i );
+		pArray[i].vel.set( random(-1, 1), random(-1, 1), 0 );		
+    }
+}
+
+void updateAsteroids()
+{
+	if (debugOn) { console.log("entering updateAsteroids..."); }
+	for (int i = 0; i < pArray.length; i++)
+    {
+		if (debugOn) { console.log("   updating asteroid...."); }
+		if (pArray[i] != null)
+		{
+			pArray[i].draw();               // draw the particle
+		}
+    }
+}
 /**
 This is a processing function.  It gets called automatically whenever the user releases
 a mouse button
 */
 void mouseReleased()
 {
-    println( "Mouse released!" );
+    console.log( "Mouse released!" );
     for ( int i=0;i<pArray.length;i++ )          // loop through all particles, and for each one...
     {
         pArray[i].attract = !pArray[i].attract;  // ...use NOT (!) to flip true to false and vice versa
@@ -89,6 +125,11 @@ void keyReleased()
         exit();          // quit the program
     }
 }
+
+void randomNum(little, big)
+{
+	return (Math.floor (Math.random() * (big - little) + little));
+}
  
 /**
 This is out particle class - it first defines member variables, then a constructor, and then
@@ -101,7 +142,8 @@ class Particle
     PVector vel;    // vel.x vel.y vel.z
     PVector acc;    // acc.x acc.y acc.z
 	int id;			//corresponds with array key
-     
+	PShape img;
+	float rotation;
     boolean attract;    // true is particles should move toward the mouse, false otherwise
      
     /**
@@ -111,38 +153,63 @@ class Particle
     Particle( float x, float y, float z, int idin )
     {
         // instantiate the vectors so we don't get null pointer exceptions
-        pos = new PVector(x, y, z);   // set the position based on parameters
+        pos = new PVector(x, y);   // set the position based on parameters
         vel = new PVector();
         acc = new PVector();
         attract = true;
 		id = idin;
+		img = loadShape("images/asteroids2.svg");
+		this.setParticleRotation();
     } 
+	
+	void setParticleRotation() //seal of "works for now" from nick
+	{
+		console.log("setting rotation");
+		var randomPercent = randomNum(1,2) == 1;
+		var brakes = randomNum(20,80);
+		
+		//randomly set rotation to either clockwise or counterclockwise
+		if (randomPercent)
+		{
+			rotation = Math.random() / brakes;
+		} else {
+			rotation = (Math.random() / brakes) * -1;
+		}
+	}
      
     /**
     update() - call once each frame to update the position of the particle
     */
-    void update()
-    {
-        mouseAttract();               // change acc to make particles accelerate toward the mouse
-        vel.add( acc );               // apply acceleration to velocity
-        pos.add( vel );               // add velocity to positon (move particle)
-        vel.mult( 0.98f );            // apply friction (otherwise particles end up moving too fast)
-        //bounce();                     // bounce off edges of screen
-        acc.set( 0, 0, 0 );           // reset acceleration - we calculate is fresh each loop
-    }  // end of Particle.update()
-     
-    /**
-    draw() - call once each frame to draw the particle on the screen
-    */
     void draw()
     {
-        colorMode( HSB, 1.0f, 1.0f, 1.0f );  // use an HSB colour model
-        fill( vel.mag(), 1.0f, 1.0f );       // set the particle colour based upon its speed
-        colorMode( RGB, 255, 255, 255 );     // return to the default colour model
-        ellipse( pos.x, pos.y, 3, 3 );       // draw the particle
+		if (stillAlive()) //this needs to say "if it's within X of the center, EXTERMINATE!!
+		{
+			img.rotate(rotation);
+			mouseAttract();               // change acc to make particles accelerate toward the mouse
+			vel.add( acc );               // apply acceleration to velocity
+			pos.add( vel );               // add velocity to positon (move particle)
+			vel.mult( 0.98f );            // apply friction (otherwise particles end up moving too fast)
+			bounce();                     // bounce off edges of screen
+			acc.set( 0, 0, 0 );           // reset acceleration - we calculate is fresh each loop
+			shape(img, pos.x, pos.y, 20, 20);
+		}
+	}  // end of Particle.update()
+    
+    void stillAlive(){
+		//this is where i need to kill the asteroid if it's too close
+		//this is where mel started fuckin' with shit
+		PVector center = new PVector( width / 2, height / 2 );
 		
-    }  // end of Particle.draw()
-     
+		var distance = dist(center.x,center.y,this.x,this.y);
+		var killThreshold = 120;
+		var result = true;
+		if (distance < killThreshold) //this needs to say "if it's within X of the center, EXTERMINATE!!
+		{
+			pArray[id] = null;
+			result = false;
+		}
+		return result;
+	}     
      
     /**
     bounce() - calculate bounces if the particle hits a screen edge
@@ -174,7 +241,8 @@ class Particle
     {
         float magnetism;          // magnetism factor - +tve values attract
          
-        if ( attract == true ) {   // check if this particle should be attracted or repulsed
+        if ( attract == true ) // check if this particle should be attracted or repulsed
+		{
             magnetism = 1.0f;      // make particles be attracted to the mouse
         } else {
             magnetism = -1.0f;    // make particles be repulsed by the mouse
@@ -193,8 +261,8 @@ class Particle
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
 			//pArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
-			
+			//this.destroy();
+			//
 		}
     }  // end of mouseAttract()
 }  // end of particle class
-
