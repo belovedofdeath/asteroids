@@ -1,41 +1,26 @@
 // @pjs preload must be used to preload the image so that it will be available when used in the sketch  
 /* @pjs preload="images/armored_io_logo.png"; */ 
 
-//MEL'S DISCLAIMER: yes this code is ugly.  will become beautiful once it works. O.O
-
 //import processing.video.*;
- 
-/*
-    This is a basic particle system.  The particles move around and are
-    either attracted to or repelled from the mouse.
-     
-    Asteroid System
-    Asteroids:
-      Member variables
-        - position
-        - velocity
-        - acceleration
-         
-      Methods:
-        - constructor
-        - update()
-        - draw()
-     
-*/
+
 boolean debugOn = true;
-Asteroid[] aArray;                // declare p - p is null!
+Asteroid[] aArray; // declare p - p is null!
 PImage logo;
 int killThreshold = 100; //how far away from center before it stops moving
 int width = 500;
 int height = 500;
 int numAsteroids = 25; 
 int backgroundColor = 0;
+
+ArrayList psystems; // for explosions
  
 void setup()
 {
     size(width, height);      // set screen size
     noStroke();            // don't draw any strokes around shapes
     smooth();              // turn on anti-aliasing
+	
+	psystems = new ArrayList(); // for explosions
 	
     if (debugOn) { console.log("setup cool."); }
     aArray = new Asteroid[numAsteroids];    // set up my array of Asteroids 
@@ -54,13 +39,24 @@ of frames per second)
 void draw()   
 {
 	if (debugOn) { console.log("starting draw round..."); }
-    background(backgroundColor);        // set background to black, erase old drawing
+    background(backgroundColor); // set background to color, erase old drawing
     if (debugOn) { console.log("set background."); }
     updateAsteroids();
 	if (debugOn) { console.log("finished updating aArray"); }
-	// format for image: iamge(PImage object, x, y, width, height)
 	drawLogo();
 	if (debugOn) { console.log("finished printing logo"); }
+	
+	//for explosions:
+	for (int i = psystems.size() - 1; i >= 0; i--)
+	{
+		ParticleSystem psys = (ParticleSystem) psystems.get(i);
+		psys.run();
+		if (psys.dead())
+		{
+			psystems.remove(i);
+		}
+	}
+	//end for explosions.
 }
 
 void drawLogo()
@@ -232,17 +228,17 @@ class Asteroid
      
     /**
     attractor()
-    Move particles towards or away from the mouse
+    Move asteroids towards or away from the mouse
     by doing some basic vector math to determine the
-    relationship between the particle and the mouse
+    relationship between the asteroid and the mouse
     and based on that, calcuating an appropriate acceleration to
-    move the particle either away from or to the mouse
+    move the asteroid either away from or to the mouse
     */
     void attractor()
     {
         float magnetism;          // magnetism factor - +tve values attract
          
-        if ( attract == true ) // check if this particle should be attracted or repulsed
+        if ( attract == true ) // check if this asteroid should be attracted or repulsed
 		{
             magnetism = 1.0f;      // make particles be attracted to the mouse
         } else {
@@ -250,10 +246,10 @@ class Asteroid
         }
          
         PVector mouse = new PVector( width / 2, height / 2 ); // create mouse pos as a vector
-        mouse.sub( pos );                              // subtract mouse pos from particle pos
-        // mouse now contains the difference vector between this particle and the mouse
+        mouse.sub( pos );                              // subtract mouse pos from asteroid pos
+        // mouse now contains the difference vector between this asteroid and the mouse
 		
-        float magnitude = mouse.mag();  // find out how far the particle is from the mouse
+        float magnitude = mouse.mag();  // find out how far the asteroid is from the mouse
 		
 		if (magnitude > killThreshold) //if it's far away, animate it!
 		{
@@ -261,9 +257,309 @@ class Asteroid
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
-			//aArray.splice(id, 1); //does this re-index the array? YES IT DOES! :D
-			//this.destroy();
+			explode(pos.x, pos.y);
 			aArray[id] = null;
 		}
     }  // end of attractor()
-}  // end of particle class
+}  // end of asteroid class
+
+// All Examples Written by Casey Reas and Ben Fry
+// unless otherwise stated.
+
+
+// When the mouse is pressed, add a new particle system
+void explode(xin, yin) {
+  psystems.add(new ParticleSystem(int(random(5,25)),new Vector3D(xin, yin)));
+}
+
+
+// A subclass of Particle
+
+// Created 2 May 2005
+
+class CrazyParticle extends Particle {
+
+  // Just adding one new variable to a CrazyParticle
+  // It inherits all other fields from "Particle", and we don't have to retype them!
+  float theta;
+
+  // The CrazyParticle constructor can call the parent class (super class) constructor
+  CrazyParticle(Vector3D l) {
+    // "super" means do everything from the constructor in Particle
+    super(l);
+    // One more line of code to deal with the new variable, theta
+    theta = 0.0;
+
+  }
+
+  // Notice we don't have the method run() here; it is inherited from Particle
+
+  // This update() method overrides the parent class update() method
+  void update() {
+    super.update();
+    // Increment rotation based on horizontal velocity
+    float theta_vel = (vel.x * vel.magnitude()) / 10.0f;
+    theta += theta_vel;
+  }
+
+  // Override timer
+  void timer() {
+    timer -= 0.5;
+  }
+  
+  // Method to display
+  void render() {
+    // Render the ellipse just like in a regular particle
+    super.render();
+
+    // Then add a rotating line
+    pushMatrix();
+    translate(loc.x,loc.y);
+    rotate(theta);
+    stroke(255,timer);
+    line(0,0,25,0);
+    popMatrix();
+  }
+}
+
+
+
+
+
+// A simple Particle class
+
+class Particle {
+  Vector3D loc;
+  Vector3D vel;
+  Vector3D acc;
+  float r;
+  float timer;
+
+  // One constructor
+  Particle(Vector3D a, Vector3D v, Vector3D l, float r_) {
+    acc = a.copy();
+    vel = v.copy();
+    loc = l.copy();
+    r = r_;
+    timer = 100.0;
+  }
+  
+  // Another constructor (the one we are using here)
+  Particle(Vector3D l) {
+    acc = new Vector3D(0,0.05,0);
+    vel = new Vector3D(random(-1,1),random(-2,0),0);
+    loc = l.copy();
+    r = 10.0;
+    timer = 100.0;
+  }
+
+
+  void run() {
+    update();
+    render();
+  }
+
+  // Method to update location
+  void update() {
+    vel.add(acc);
+    loc.add(vel);
+    timer -= 1.0;
+  }
+
+  // Method to display
+  void render() {
+    ellipseMode(CENTER);
+    noStroke();
+    fill(255,timer);
+    ellipse(loc.x,loc.y,r,r);
+  }
+  
+  // Is the particle still useful?
+  boolean dead() {
+    if (timer <= 0.0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+
+// A class to describe a group of Particles
+// An ArrayList is used to manage the list of Particles 
+
+class ParticleSystem {
+
+  ArrayList particles;    // An arraylist for all the particles
+  Vector3D origin;        // An origin point for where particles are birthed
+
+  ParticleSystem(int num, Vector3D v) {
+    particles = new ArrayList();              // Initialize the arraylist
+    origin = v.copy();                        // Store the origin point
+    for (int i = 0; i < num; i++) {
+      particles.add(new CrazyParticle(origin));    // Add "num" amount of particles to the arraylist
+    }
+  }
+
+  void run() {
+    // Cycle through the ArrayList backwards b/c we are deleting
+    for (int i = particles.size()-1; i >= 0; i--) {
+      Particle p = (Particle) particles.get(i);
+      p.run();
+      if (p.dead()) {
+        particles.remove(i);
+      }
+    }
+  }
+
+  void addParticle() {
+    particles.add(new Particle(origin));
+  }
+
+  void addParticle(Particle p) {
+    particles.add(p);
+  }
+
+  // A method to test if the particle system still has particles
+  boolean dead() {
+    if (particles.isEmpty()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+}
+
+
+
+// Simple Vector3D Class 
+
+public class Vector3D {
+  public float x;
+  public float y;
+  public float z;
+
+  Vector3D(float x_, float y_, float z_) {
+    x = x_; y = y_; z = z_;
+  }
+
+  Vector3D(float x_, float y_) {
+    x = x_; y = y_; z = 0f;
+  }
+  
+  Vector3D() {
+    x = 0f; y = 0f; z = 0f;
+  }
+
+  void setX(float x_) {
+    x = x_;
+  }
+
+  void setY(float y_) {
+    y = y_;
+  }
+
+  void setZ(float z_) {
+    z = z_;
+  }
+  
+  void setXY(float x_, float y_) {
+    x = x_;
+    y = y_;
+  }
+  
+  void setXYZ(float x_, float y_, float z_) {
+    x = x_;
+    y = y_;
+    z = z_;
+  }
+
+  void setXYZ(Vector3D v) {
+    x = v.x;
+    y = v.y;
+    z = v.z;
+  }
+  public float magnitude() {
+    return (float) Math.sqrt(x*x + y*y + z*z);
+  }
+
+  public Vector3D copy() {
+    return new Vector3D(x,y,z);
+  }
+
+  public Vector3D copy(Vector3D v) {
+    return new Vector3D(v.x, v.y,v.z);
+  }
+  
+  public void add(Vector3D v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+  }
+
+  public void sub(Vector3D v) {
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
+  }
+
+  public void mult(float n) {
+    x *= n;
+    y *= n;
+    z *= n;
+  }
+
+  public void div(float n) {
+    x /= n;
+    y /= n;
+    z /= n;
+  }
+
+  public void normalize() {
+    float m = magnitude();
+    if (m > 0) {
+       div(m);
+    }
+  }
+
+  public void limit(float max) {
+    if (magnitude() > max) {
+      normalize();
+      mult(max);
+    }
+  }
+
+  public float heading2D() {
+    float angle = (float) Math.atan2(-y, x);
+    return -1*angle;
+  }
+
+  public Vector3D add(Vector3D v1, Vector3D v2) {
+    Vector3D v = new Vector3D(v1.x + v2.x,v1.y + v2.y, v1.z + v2.z);
+    return v;
+  }
+
+  public Vector3D sub(Vector3D v1, Vector3D v2) {
+    Vector3D v = new Vector3D(v1.x - v2.x,v1.y - v2.y,v1.z - v2.z);
+    return v;
+  }
+
+  public Vector3D div(Vector3D v1, float n) {
+    Vector3D v = new Vector3D(v1.x/n,v1.y/n,v1.z/n);
+    return v;
+  }
+
+  public Vector3D mult(Vector3D v1, float n) {
+    Vector3D v = new Vector3D(v1.x*n,v1.y*n,v1.z*n);
+    return v;
+  }
+
+  public float distance (Vector3D v1, Vector3D v2) {
+    float dx = v1.x - v2.x;
+    float dy = v1.y - v2.y;
+    float dz = v1.z - v2.z;
+    return (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
+  }
+
+}
