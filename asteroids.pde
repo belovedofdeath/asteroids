@@ -200,7 +200,7 @@ class Asteroid
 		//this is where mel started fuckin' with shit
 		PVector center = new PVector( width / 2, height / 2 );
 		
-		var distance = dist(center.x,center.y,this.x,this.y);
+		var distance = dist(center.x,center.y - 35,this.x,this.y);
 		var result = true;
 		if (distance < killThreshold) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
