@@ -259,7 +259,7 @@ class Asteroid
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
-			explode(pos.x, pos.y);
+			explode(pos.x + (img.width / 2), pos.y + (img.height / 2));
 			aArray[id] = null;
 		}
     }  // end of attractor()
