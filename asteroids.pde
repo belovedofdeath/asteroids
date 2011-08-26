@@ -1,5 +1,5 @@
 // @pjs preload must be used to preload the image so that it will be available when used in the sketch  
-/* @pjs preload="images/armored_io_logo.png"; */ 
+/* @pjs preload="images/cloud-city-transparent-bg.png"; */ 
 
 //import processing.video.*;
 
@@ -27,7 +27,7 @@ void setup()
     if (debugOn) { console.log("instantiating asteroids..."); }
     createAsteroids();
 	if (debugOn) { console.log("made asteroids."); }
-	logo = loadImage("images/armored_io_logo.png");
+	logo = loadImage("images/cloud-city-transparent-bg.png");
 	if (debugOn) { console.log("set image"); }
 }
  
@@ -182,7 +182,9 @@ class Asteroid
     {
 		if (stillAlive()) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
+			img.translate(img.width / 2, img.width / 2);
 			img.rotate(rotation);
+			img.translate((img.width / 2) * -1, (img.width / 2) * -1);
 			attractor();               // change acc to make particles accelerate toward the mouse
 			vel.add( acc );               // apply acceleration to velocity
 			pos.add( vel );               // add velocity to positon (move particle)
@@ -349,7 +351,7 @@ class Particle {
     acc = new Vector3D(0,0.05,0);
     vel = new Vector3D(random(-1,1),random(-2,0),0);
     loc = l.copy();
-    r = 10.0;
+    r = 3.0; //radius of particles
     timer = 100.0;
   }
 
