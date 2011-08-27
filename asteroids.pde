@@ -1,16 +1,24 @@
 // @pjs preload must be used to preload the image so that it will be available when used in the sketch  
 /* @pjs preload="images/cloud-city-transparent-bg.png"; */ 
+/* @pjs preload="images/forcefield.png"; */ 
 
 //import processing.video.*;
 
 boolean debugOn = true;
+boolean displayForceField = false;
 Asteroid[] aArray; // declare p - p is null!
 PImage logo;
+PImage forcefield;
 int killThreshold = 100; //how far away from center before it stops moving
 int width = 500;
 int height = 500;
+int score;
 int numAsteroids = 25; 
 int backgroundColor = 0;
+
+PFont font;
+float fontX = 0;
+float fontY = 0;
 
 ArrayList psystems; // for explosions
  
@@ -22,13 +30,13 @@ void setup()
 	
 	psystems = new ArrayList(); // for explosions
 	
-    if (debugOn) { console.log("setup cool."); }
     aArray = new Asteroid[numAsteroids];    // set up my array of Asteroids 
-    if (debugOn) { console.log("instantiating asteroids..."); }
     createAsteroids();
-	if (debugOn) { console.log("made asteroids."); }
 	logo = loadImage("images/cloud-city-transparent-bg.png");
-	if (debugOn) { console.log("set image"); }
+	forcefield = loadImage("images/forcefield.png");
+	
+	font = loadFont("AmericanTypewriter-24.vlw");  
+	textFont(font); 
 }
  
 /**
@@ -38,13 +46,15 @@ of frames per second)
 */
 void draw()   
 {
-	if (debugOn) { console.log("starting draw round..."); }
     background(backgroundColor); // set background to color, erase old drawing
-    if (debugOn) { console.log("set background."); }
     updateAsteroids();
-	if (debugOn) { console.log("finished updating aArray"); }
 	drawLogo();
-	if (debugOn) { console.log("finished printing logo"); }
+	
+	if (displayForceField)
+	{
+		image(forcefield, (width / 2) - (forcefield.width / 4), (height / 2) - (forcefield.height / 4), forcefield.width / 2, forcefield.height / 2);
+		displayForceField = false;
+	}
 	
 	//for explosions:
 	for (int i = psystems.size() - 1; i >= 0; i--)
@@ -57,6 +67,9 @@ void draw()
 		}
 	}
 	//end for explosions.
+	
+	fill(255);
+	text(String(score), 15, 25); 
 }
 
 void drawLogo()
@@ -68,6 +81,17 @@ void drawLogo()
 	var logoDisplayWidth = (logo.width / scaleLogo);
 	var logoDisplayHeight = (logo.height / scaleLogo);
 	image(logo, logoX, logoY, logoDisplayWidth, logoDisplayHeight);
+}
+
+void forcefield()
+{
+	var scaleLogo = 4;
+	var doublingFactor = scaleLogo * 2;
+	var logoX = (width / 2) - (forcefield.width / doublingFactor);
+	var logoY = (height / 2) - (forcefield.height / doublingFactor);
+	var logoDisplayWidth = (forcefield.width / scaleLogo);
+	var logoDisplayHeight = (forcefield.height / scaleLogo);
+	image(forcefield, logoX, logoY, logoDisplayWidth, logoDisplayHeight);
 }
 
 void createAsteroids()
@@ -138,6 +162,8 @@ class Asteroid
     PVector acc;    // acc.x acc.y acc.z
 	int id;			//corresponds with array key
 	int size;
+	int pointValue; //value that asteroid is worth
+	int colorValue; //value of asteroid's color in #FFCC00 format
 	PShape img;
 	float rotation;
     boolean attract;    // true if asteroids should move toward the center, false otherwise
@@ -158,6 +184,7 @@ class Asteroid
 		img = loadShape("images/" + shapeName + ".svg");
 		this.setAsteroidRotation();
 		size = randomNum(20,40); //this will eventually be set by the type of attack is incoming
+		pointValue = randomNum(100,500);
     } 
 	
 	void setAsteroidRotation() //seal of "works for now" from nick
@@ -182,6 +209,7 @@ class Asteroid
     {
 		if (stillAlive()) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
+			
 			img.translate(img.width / 2, img.width / 2);
 			img.rotate(rotation);
 			img.translate((img.width / 2) * -1, (img.width / 2) * -1);
@@ -190,7 +218,7 @@ class Asteroid
 			pos.add( vel );               // add velocity to positon (move particle)
 			vel.mult( 0.98f );            // apply friction (otherwise particles end up moving too fast)
 			bounce();                     // bounce off edges of screen
-			acc.set( 0, 0, 0 );           // reset acceleration - we calculate is fresh each loop
+			acc.set( 0, 0, 0 );           // reset acceleration - we calculate is fresh each loopint 
 			shape(img, pos.x, pos.y, size, size);
 		}
 	}  // end of Asteroid.update()
@@ -204,8 +232,8 @@ class Asteroid
 		var result = true;
 		if (distance < killThreshold) //this needs to say "if it's within X of the center, EXTERMINATE!!
 		{
-			aArray[id] = null;
-			result = false;
+			//aArray[id] = null;
+			//result = false;
 		}
 		return result;
 	}     
@@ -259,11 +287,15 @@ class Asteroid
 			acc.mult( magnetism / (magnitude * magnitude) );  // scale the attraction/repuse effect using
                                                           // an inverse square
 		} else { //if it's close, explode it! (ie: for now, just delete it)
+			//forcefield();
+			score += pointValue;
+			displayForceField = true;
 			explode(pos.x + (img.width / 2), pos.y + (img.height / 2));
 			aArray[id] = null;
 		}
     }  // end of attractor()
 }  // end of asteroid class
+
 
 // All Examples Written by Casey Reas and Ben Fry
 // unless otherwise stated.
@@ -323,9 +355,6 @@ class CrazyParticle extends Particle {
     popMatrix();
   }
 }
-
-
-
 
 
 // A simple Particle class
